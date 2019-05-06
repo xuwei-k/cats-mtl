@@ -2,7 +2,6 @@ package cats
 package mtl
 package tests
 
-import catalysts.Platform
 import cats.arrow.FunctionK
 import cats.data._
 import cats.syntax.{EqOps, EqSyntax}
@@ -113,14 +112,13 @@ abstract class BaseSuite extends FunSuite
 
   lazy val checkConfiguration: PropertyCheckConfiguration =
     PropertyCheckConfiguration(
-      minSuccessful = if (Platform.isJvm) PosInt(35) else PosInt(5),
-      maxDiscardedFactor = if (Platform.isJvm) PosZDouble(5.0) else PosZDouble(50.0),
+      minSuccessful = PosInt(5),
+      maxDiscardedFactor = PosZDouble(50.0),
       minSize = PosZInt(0),
-      sizeRange = if (Platform.isJvm) PosZInt(10) else PosZInt(5),
+      sizeRange = PosZInt(5),
       workers = PosInt(1))
 
   lazy val slowCheckConfiguration: PropertyCheckConfiguration =
-    if (Platform.isJvm) checkConfiguration
-    else PropertyCheckConfiguration(minSuccessful = 1, sizeRange = 1)
+    PropertyCheckConfiguration(minSuccessful = 1, sizeRange = 1)
 
 }

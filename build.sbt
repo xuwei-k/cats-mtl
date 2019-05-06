@@ -36,9 +36,9 @@ lazy val includeGeneratedSrc: Seq[Setting[_]] = Seq(
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalacOptions ++= CompilerOptions.commonScalacOptions,
   libraryDependencies ++= Seq(
-    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9"),
-    "com.github.mpilquist" %%% "simulacrum" % "0.15.0",
-    "org.typelevel" %%% "machinist" % "0.6.6"
+    compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.0"),
+    "com.github.mpilquist" %%% "simulacrum" % "0.16.0",
+    "org.typelevel" %%% "machinist" % "0.6.7"
   ),
   fork in test := true,
   parallelExecution in Test := false
@@ -77,7 +77,7 @@ lazy val commonJsSettings = Seq(
 
 // projects
 
-lazy val catsVersion = "1.6.0"
+lazy val catsVersion = "2.0.0-M1"
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -85,9 +85,9 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(coreSettings: _*)
   .settings(includeGeneratedSrc)
   .settings(
-    libraryDependencies += "com.lihaoyi" %% "acyclic" % "0.1.8" % "provided",
+    libraryDependencies += "com.lihaoyi" %% "acyclic" % "0.1.9" % "provided",
     autoCompilerPlugins := true,
-    addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.8"),
+    addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.9"),
     scalacOptions += "-P:acyclic:force",
     libraryDependencies += "org.typelevel" %%% "cats-core" % catsVersion
   )
