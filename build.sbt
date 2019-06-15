@@ -36,11 +36,28 @@ lazy val includeGeneratedSrc: Seq[Setting[_]] = Seq(
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   incOptions := incOptions.value.withLogRecompileOnMacro(false),
   scalacOptions ++= CompilerOptions.commonScalacOptions,
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v <= 12 =>
+        Seq("-Yno-adapted-args")
+      case _ =>
+        Nil
+    }
+  },
+  libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v <= 12 =>
+        Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch))
+      case _ =>
+        // if scala 2.13.0-M4 or later, macro annotations merged into scala-reflect
+        // https://github.com/scala/scala/pull/6606
+        Nil
+    }
+  },
   libraryDependencies ++= Seq(
-    compilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.patch),
-    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9"),
-    "com.github.mpilquist" %%% "simulacrum" % "0.15.0",
-    "org.typelevel" %%% "machinist" % "0.6.6"
+    compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
+    "com.github.mpilquist" %%% "simulacrum" % "0.19.0",
+    "org.typelevel" %%% "machinist" % "0.6.8"
   ),
   fork in test := true,
   parallelExecution in Test := false
@@ -78,7 +95,16 @@ lazy val commonJsSettings = Seq(
 
 // projects
 
-lazy val catsVersion = "1.6.0"
+lazy val catsVersion = "2.0.0-M4"
+
+val acyclicVersion = Def.setting(
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 11 =>
+      "0.1.9"
+    case _ =>
+      "0.2.0"
+  }
+)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -86,9 +112,9 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(coreSettings: _*)
   .settings(includeGeneratedSrc)
   .settings(
-    libraryDependencies += "com.lihaoyi" %% "acyclic" % "0.1.8" % "provided",
+    libraryDependencies += "com.lihaoyi" %% "acyclic" % acyclicVersion.value % "provided",
     autoCompilerPlugins := true,
-    addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.8"),
+    libraryDependencies += compilerPlugin("com.lihaoyi" %% "acyclic" % acyclicVersion.value),
     scalacOptions += "-P:acyclic:force",
     libraryDependencies += "org.typelevel" %%% "cats-core" % catsVersion
   )
@@ -142,7 +168,6 @@ lazy val docSettings = Seq(
   fork in tut := true,
   fork in (ScalaUnidoc, unidoc) := true,
   scalacOptions in (ScalaUnidoc, unidoc) ++= Seq(
-    "-Xfatal-warnings",
     "-doc-source-url",
     scmInfo.value.get.browseUrl + "/tree/master€{FILE_PATH}.scala",
     "-sourcepath",

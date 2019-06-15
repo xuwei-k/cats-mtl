@@ -10,9 +10,7 @@ object CompilerOptions {
     "-language:higherKinds",
     "-language:implicitConversions",
     "-unchecked",
-    "-Xfatal-warnings",
 //    "-Xlint",
-    "-Yno-adapted-args",
 //    "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",
@@ -24,8 +22,10 @@ object CompilerOptions {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, 10)) =>
           Seq()
-        case Some((2, n)) if n >= 11 =>
+        case Some((2, 11)) =>
           Seq("-Ywarn-unused-import")
+        case Some((2, n)) if n >= 12 =>
+          Seq("-Ywarn-unused:imports")
       }
     },
     scalacOptions in(Compile, console) ~= {
